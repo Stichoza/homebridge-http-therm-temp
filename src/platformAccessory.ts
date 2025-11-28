@@ -41,93 +41,88 @@ export class HttpThermostatTemperatureAccessory {
         .onGet(this.handleTemperatureDisplayUnitsGet.bind(this))
         .onSet(this.handleTemperatureDisplayUnitsSet.bind(this));
 
-    /**
-     * Creating multiple services of the same type.
-     *
-     * To avoid "Cannot add a Service with the same UUID another Service without also defining a unique 'subtype' property." error,
-     * when creating multiple services of the same type, you need to use the following syntax to specify a name and subtype id:
-     * this.accessory.getService('NAME') || this.accessory.addService(this.platform.Service.Lightbulb, 'NAME', 'USER_DEFINED_SUBTYPE_ID');
-     *
-     * The USER_DEFINED_SUBTYPE must be unique to the platform accessory (if you platform exposes multiple accessories, each accessory
-     * can use the same subtype id.)
-     */
-
-    // Example: add two "motion sensor" services to the accessory
-    const motionSensorOneService = this.accessory.getService('Motion Sensor One Name')
-      || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor One Name', 'YourUniqueIdentifier-1');
-
-    const motionSensorTwoService = this.accessory.getService('Motion Sensor Two Name')
-      || this.accessory.addService(this.platform.Service.MotionSensor, 'Motion Sensor Two Name', 'YourUniqueIdentifier-2');
-
-    /**
-     * Updating characteristics values asynchronously.
-     *
-     * Example showing how to update the state of a Characteristic asynchronously instead
-     * of using the `on('get')` handlers.
-     * Here we change update the motion sensor trigger states on and off every 10 seconds
-     * the `updateCharacteristic` method.
-     *
-     */
-    let motionDetected = false;
     setInterval(() => {
-      // EXAMPLE - inverse the trigger
-      motionDetected = !motionDetected;
+      // TODO: Handle temperature update and thermostat toggle
+    }, 60000);
+  }
 
-      // push the new value to HomeKit
-      motionSensorOneService.updateCharacteristic(this.platform.Characteristic.MotionDetected, motionDetected);
-      motionSensorTwoService.updateCharacteristic(this.platform.Characteristic.MotionDetected, !motionDetected);
+  handleCurrentHeatingCoolingStateGet() {
+    //this.log.debug('Triggered GET CurrentHeatingCoolingState');
 
-      this.platform.log.debug('Triggering motionSensorOneService:', motionDetected);
-      this.platform.log.debug('Triggering motionSensorTwoService:', !motionDetected);
-    }, 10000);
+    // set this to a valid value for CurrentHeatingCoolingState
+    const currentValue = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+
+    return currentValue;
+  }
+
+
+  /**
+   * Handle requests to get the current value of the "Target Heating Cooling State" characteristic
+   */
+  handleTargetHeatingCoolingStateGet() {
+    //this.log.debug('Triggered GET TargetHeatingCoolingState');
+
+    // set this to a valid value for TargetHeatingCoolingState
+    const currentValue = this.platform.Characteristic.TargetHeatingCoolingState.OFF;
+
+    return currentValue;
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
+   * Handle requests to set the "Target Heating Cooling State" characteristic
    */
-  async setOn(value: CharacteristicValue) {
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
-
-    this.platform.log.debug('Set Characteristic On ->', value);
+  handleTargetHeatingCoolingStateSet(value: CharacteristicValue) {
+    //this.log.debug('Triggered SET TargetHeatingCoolingState:' value);
   }
 
   /**
-   * Handle the "GET" requests from HomeKit
-   * These are sent when HomeKit wants to know the current state of the accessory, for example, checking if a Light bulb is on.
-   *
-   * GET requests should return as fast as possible. A long delay here will result in
-   * HomeKit being unresponsive and a bad user experience in general.
-   *
-   * If your device takes time to respond you should update the status of your device
-   * asynchronously instead using the `updateCharacteristic` method instead.
-   * In this case, you may decide not to implement `onGet` handlers, which may speed up
-   * the responsiveness of your device in the Home app.
-
-   * @example
-   * this.service.updateCharacteristic(this.platform.Characteristic.On, true)
+   * Handle requests to get the current value of the "Current Temperature" characteristic
    */
-  async getOn(): Promise<CharacteristicValue> {
-    // implement your own code to check if the device is on
-    const isOn = this.exampleStates.On;
+  handleCurrentTemperatureGet() {
+    //this.log.debug('Triggered GET CurrentTemperature');
 
-    this.platform.log.debug('Get Characteristic On ->', isOn);
+    // set this to a valid value for CurrentTemperature
+    const currentValue = -270;
 
-    // if you need to return an error to show the device as "Not Responding" in the Home app:
-    // throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    return currentValue;
+  }
 
-    return isOn;
+
+  /**
+   * Handle requests to get the current value of the "Target Temperature" characteristic
+   */
+  handleTargetTemperatureGet() {
+    //this.log.debug('Triggered GET TargetTemperature');
+
+    // set this to a valid value for TargetTemperature
+    const currentValue = 10;
+
+    return currentValue;
   }
 
   /**
-   * Handle "SET" requests from HomeKit
-   * These are sent when the user changes the state of an accessory, for example, changing the Brightness
+   * Handle requests to set the "Target Temperature" characteristic
    */
-  async setBrightness(value: CharacteristicValue) {
-    // implement your own code to set the brightness
-    this.exampleStates.Brightness = value as number;
+  handleTargetTemperatureSet(value: CharacteristicValue) {
+    //this.log.debug('Triggered SET TargetTemperature:' value);
+  }
 
-    this.platform.log.debug('Set Characteristic Brightness -> ', value);
+  /**
+   * Handle requests to get the current value of the "Temperature Display Units" characteristic
+   */
+  handleTemperatureDisplayUnitsGet() {
+    //this.log.debug('Triggered GET TemperatureDisplayUnits');
+
+    // set this to a valid value for TemperatureDisplayUnits
+    const currentValue = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
+
+    return currentValue;
+  }
+
+  /**
+   * Handle requests to set the "Temperature Display Units" characteristic
+   */
+  handleTemperatureDisplayUnitsSet(value: CharacteristicValue) {
+    //this.log.debug('Triggered SET TemperatureDisplayUnits:' value);
   }
 }
