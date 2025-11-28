@@ -24,9 +24,25 @@ export class HttpThermostatTemperatureAccessory {
     this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device.displayName);
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
+      .setProps({
+        minValue: this.platform.Characteristic.CurrentHeatingCoolingState.OFF,
+        maxValue: this.platform.Characteristic.CurrentHeatingCoolingState.HEAT,
+        validValues: [
+          this.platform.Characteristic.CurrentHeatingCoolingState.OFF,
+          this.platform.Characteristic.CurrentHeatingCoolingState.HEAT,
+        ],
+      })
       .onGet(this.handleCurrentHeatingCoolingStateGet.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
+      .setProps({
+        minValue: this.platform.Characteristic.TargetHeatingCoolingState.OFF,
+        maxValue: this.platform.Characteristic.TargetHeatingCoolingState.HEAT,
+        validValues: [
+          this.platform.Characteristic.CurrentHeatingCoolingState.OFF,
+          this.platform.Characteristic.CurrentHeatingCoolingState.HEAT,
+        ],
+      })
       .onGet(this.handleTargetHeatingCoolingStateGet.bind(this))
       .onSet(this.handleTargetHeatingCoolingStateSet.bind(this));
 
