@@ -5,13 +5,41 @@
   "strictValidation": false,
   "schema": {
     "type": "object",
-    "required": ["name"],
     "additionalProperties": false,
     "properties": {
       "name": {
         "title": "Name",
         "type": "string",
         "default": "Thermostat"
+      },
+      "temperatureUrl": {
+        "title": "Temperature URL",
+        "type": "string",
+        "default": "http://192.168.0.111/temperature",
+        "required": true
+      },
+      "temperatureJsonPath": {
+        "title": "Temperature JSON Path",
+        "type": "string",
+        "default": "temperature",
+        "required": true
+      },
+      "thermostatOnUrl": {
+        "title": "Thermostat On URL",
+        "type": "string",
+        "default": "http://192.168.0.222/on",
+        "required": true
+      },
+      "thermostatOffUrl": {
+        "title": "Thermostat Off URL",
+        "type": "string",
+        "default": "http://192.168.0.222/off",
+        "required": true
+      },
+      "thermostatStatusUrl": {
+        "title": "Thermostat Status URL",
+        "type": "string",
+        "default": "http://192.168.0.222/status"
       }
     }
   }
