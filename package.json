@@ -6,7 +6,10 @@
   "private": true,
   "description": "HTTP Thermostat plugin which uses external HTTP temperature sensor.",
   "author": "Levan Velijanashvili <me@stichoza.com>",
-  "license": "Apache-2.0",
+  "maintainers": [
+    "stichoza"
+  ],
+  "license": "MIT",
   "homepage": "https://github.com/Stichoza/homebridge-http-therm-temp/#readme",
   "repository": {
     "type": "git",
