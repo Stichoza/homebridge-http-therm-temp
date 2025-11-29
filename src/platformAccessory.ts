@@ -4,11 +4,10 @@ import type { HttpThermostatTemperaturePlatform } from './platform.js';
 export class HttpThermostatTemperatureAccessory {
   private service: Service;
 
-  private state = {
-    On: true,
-    Temperature: 23,
-    TargetTemperature: 23,
-  };
+  private accessoryState: boolean = true;
+  private relayState: boolean = true;
+  private currentTemperature: number = 0;
+  private targetTemperature: number = 10;
 
   constructor(
     private readonly platform: HttpThermostatTemperaturePlatform,
@@ -17,7 +16,8 @@ export class HttpThermostatTemperatureAccessory {
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
       .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Stichoza')
       .setCharacteristic(this.platform.Characteristic.Model, 'HTTP Thermostat Temperature')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, '1.0.0');
+      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'HTT100')
+      .setCharacteristic(this.platform.Characteristic.FirmwareRevision, '1.0.0');
 
     this.service = this.accessory.getService(this.platform.Service.Thermostat) || this.accessory.addService(this.platform.Service.Thermostat);
 
@@ -32,7 +32,7 @@ export class HttpThermostatTemperatureAccessory {
           this.platform.Characteristic.CurrentHeatingCoolingState.HEAT,
         ],
       })
-      .onGet(this.handleCurrentHeatingCoolingStateGet.bind(this));
+      .onGet(this.getCurrentHeatingCoolingState.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
       .setProps({
@@ -43,72 +43,60 @@ export class HttpThermostatTemperatureAccessory {
           this.platform.Characteristic.CurrentHeatingCoolingState.HEAT,
         ],
       })
-      .onGet(this.handleTargetHeatingCoolingStateGet.bind(this))
-      .onSet(this.handleTargetHeatingCoolingStateSet.bind(this));
+      .onGet(this.getTargetHeatingCoolingState.bind(this))
+      .onSet(this.setTargetHeatingCoolingState.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
-      .onGet(this.handleCurrentTemperatureGet.bind(this));
+      .onGet(this.getCurrentTemperature.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature)
-      .onGet(this.handleTargetTemperatureGet.bind(this))
-      .onSet(this.handleTargetTemperatureSet.bind(this));
+      .onGet(this.getTargetTemperature.bind(this))
+      .onSet(this.setTargetTemperature.bind(this));
 
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
-      .onGet(this.handleTemperatureDisplayUnitsGet.bind(this))
-      .onSet(this.handleTemperatureDisplayUnitsSet.bind(this));
+      .onGet(this.getTemperatureDisplayUnits.bind(this))
+      .onSet(this.setTemperatureDisplayUnits.bind(this));
 
     setInterval(() => {
       // TODO: Handle temperature update and thermostat toggle
     }, 60000);
   }
 
-  async handleCurrentHeatingCoolingStateGet() {
-    this.platform.log.debug('Triggered GET CurrentHeatingCoolingState');
-
-    const currentValue = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
-
-    return currentValue;
+  async getCurrentHeatingCoolingState() {
+    return this.accessoryState ? this.platform.Characteristic.CurrentHeatingCoolingState.HEAT : this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
   }
 
-  async handleTargetHeatingCoolingStateGet() {
-    this.platform.log.debug('Triggered GET TargetHeatingCoolingState');
-
-    const currentValue = this.platform.Characteristic.TargetHeatingCoolingState.OFF;
-
-    return currentValue;
+  async getTargetHeatingCoolingState() {
+    return this.accessoryState ? this.platform.Characteristic.TargetHeatingCoolingState.HEAT : this.platform.Characteristic.TargetHeatingCoolingState.OFF;
   }
 
-  async handleTargetHeatingCoolingStateSet(value: CharacteristicValue) {
+  async setTargetHeatingCoolingState(value: CharacteristicValue) {
     this.platform.log.debug('Triggered SET TargetHeatingCoolingState:', value);
+
+    this.accessoryState = value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
+    this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).updateValue(value);
   }
 
-  async handleCurrentTemperatureGet() {
-    this.platform.log.debug('Triggered GET CurrentTemperature');
-
-    const currentValue = -270;
-
-    return currentValue;
+  async getCurrentTemperature() {
+    return this.currentTemperature;
   }
 
-  async handleTargetTemperatureGet() {
-    this.platform.log.debug('Triggered GET TargetTemperature');
-
-    const currentValue = 10;
-
-    return currentValue;
+  async getTargetTemperature() {
+    return this.targetTemperature;
   }
 
-  async handleTargetTemperatureSet(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET TargetTemperature:', value);
+  async setTargetTemperature(value: CharacteristicValue) {
+    this.platform.log.debug('Setting current temperature to ', value);
+
+    this.targetTemperature = parseFloat(value as string);
+    this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature).updateValue(this.targetTemperature);
   }
 
-  async handleTemperatureDisplayUnitsGet() {
-    const currentValue = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
-
-    return currentValue;
+  async getTemperatureDisplayUnits() {
+    return this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits).value;
   }
 
-  async handleTemperatureDisplayUnitsSet(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET TemperatureDisplayUnits:', value);
+  async setTemperatureDisplayUnits(value: CharacteristicValue) {
+    this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits).updateValue(value);
   }
 }
