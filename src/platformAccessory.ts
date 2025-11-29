@@ -119,8 +119,13 @@ export class HttpThermostatTemperatureAccessory {
   }
 
   async updateRelayState() {
+    const oldState = this.relayState;
     this.relayState = this.accessoryState && this.currentTemperature < this.targetTemperature;
-    this.platform.log.info('Updating relay state:', this.relayState);
+    
+    if (oldState !== this.relayState) {
+      this.platform.log.info('Turning relay', this.relayState ? 'on' : 'off');
+    }
+
     try {
       await fetch(this.relayState ? this.platform.config.thermostatOnUrl : this.platform.config.thermostatOffUrl);
     } catch (error) {
