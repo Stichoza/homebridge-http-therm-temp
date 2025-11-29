@@ -58,8 +58,10 @@ export class HttpThermostatTemperatureAccessory {
       .onGet(this.getTemperatureDisplayUnits.bind(this))
       .onSet(this.setTemperatureDisplayUnits.bind(this));
 
-    setInterval(this.updateTemperature.bind(this), 60000);
-    setInterval(this.updateRelayState.bind(this), 60000);
+    setInterval(async () => {
+      await this.updateTemperature();
+      await this.updateRelayState();
+    }, 60000);
   }
 
   async getCurrentHeatingCoolingState() {
@@ -71,11 +73,11 @@ export class HttpThermostatTemperatureAccessory {
   }
 
   async setTargetHeatingCoolingState(value: CharacteristicValue) {
-    this.platform.log.debug('Triggered SET TargetHeatingCoolingState:', value);
+    this.platform.log.info('Setting thermostat state to : ', value);
 
     this.accessoryState = value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).updateValue(value);
-    this.updateRelayState();
+    await this.updateRelayState();
   }
 
   async getCurrentTemperature() {
@@ -87,11 +89,11 @@ export class HttpThermostatTemperatureAccessory {
   }
 
   async setTargetTemperature(value: CharacteristicValue) {
-    this.platform.log.debug('Setting current temperature to ', value);
+    this.platform.log.info('Setting target temperature to ', value);
 
     this.targetTemperature = parseFloat(value as string);
     this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature).updateValue(this.targetTemperature);
-    this.updateRelayState();
+    await this.updateRelayState();
   }
 
   async getTemperatureDisplayUnits() {
@@ -120,7 +122,7 @@ export class HttpThermostatTemperatureAccessory {
 
   async updateRelayState() {
     this.relayState = this.accessoryState && this.currentTemperature < this.targetTemperature;
-    this.platform.log.debug('Updating relay state: ', this.relayState);
+    this.platform.log.info('Updating relay state: ', this.relayState);
     try {
       await fetch(this.relayState ? this.platform.config.thermostatOnUrl : this.platform.config.thermostatOffUrl);
     } catch (error) {
