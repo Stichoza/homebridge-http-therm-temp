@@ -71,7 +71,7 @@ export class HttpThermostatTemperatureAccessory {
   }
 
   async setTargetHeatingCoolingState(value: CharacteristicValue) {
-    this.platform.log.info('Setting thermostat state to : ', value);
+    this.platform.log.info('Setting thermostat state to:', value);
 
     this.accessoryState = value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).updateValue(value);
@@ -87,7 +87,7 @@ export class HttpThermostatTemperatureAccessory {
   }
 
   async setTargetTemperature(value: CharacteristicValue) {
-    this.platform.log.info('Setting target temperature to ', value);
+    this.platform.log.info('Setting target temperature to:', value);
 
     this.targetTemperature = parseFloat(value as string);
     this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature).updateValue(this.targetTemperature);
@@ -114,17 +114,17 @@ export class HttpThermostatTemperatureAccessory {
 
       this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature).updateValue(this.currentTemperature);
     } catch (error) {
-      this.platform.log.error('Error getting temperature: ', error);
+      this.platform.log.error('Error getting temperature:', error);
     }
   }
 
   async updateRelayState() {
     this.relayState = this.accessoryState && this.currentTemperature < this.targetTemperature;
-    this.platform.log.info('Updating relay state: ', this.relayState);
+    this.platform.log.info('Updating relay state:', this.relayState);
     try {
       await fetch(this.relayState ? this.platform.config.thermostatOnUrl : this.platform.config.thermostatOffUrl);
     } catch (error) {
-      this.platform.log.error('Error updating relay state: ', error);
+      this.platform.log.error('Error updating relay state:', error);
     }
   }
 }
