@@ -4,10 +4,11 @@ import type { HttpThermostatTemperaturePlatform } from './platform.js';
 export class HttpThermostatTemperatureAccessory {
   private service: Service;
 
+  // TODO: Maintain values after restart
   private accessoryState: boolean = true;
   private relayState: boolean = true;
   private currentTemperature: number = 0;
-  private targetTemperature: number = 10;
+  private targetTemperature: number = 24;
 
   constructor(
     private readonly platform: HttpThermostatTemperaturePlatform,
@@ -57,9 +58,8 @@ export class HttpThermostatTemperatureAccessory {
       .onGet(this.getTemperatureDisplayUnits.bind(this))
       .onSet(this.setTemperatureDisplayUnits.bind(this));
 
-    setInterval(() => {
-      // TODO: Handle temperature update and thermostat toggle
-    }, 60000);
+    setInterval(this.updateTemperature.bind(this), 60000);
+    setInterval(this.updateRelayState.bind(this), 60000);
   }
 
   async getCurrentHeatingCoolingState() {
@@ -75,6 +75,7 @@ export class HttpThermostatTemperatureAccessory {
 
     this.accessoryState = value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).updateValue(value);
+    this.updateRelayState();
   }
 
   async getCurrentTemperature() {
@@ -90,6 +91,7 @@ export class HttpThermostatTemperatureAccessory {
 
     this.targetTemperature = parseFloat(value as string);
     this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature).updateValue(this.targetTemperature);
+    this.updateRelayState();
   }
 
   async getTemperatureDisplayUnits() {
@@ -98,5 +100,31 @@ export class HttpThermostatTemperatureAccessory {
 
   async setTemperatureDisplayUnits(value: CharacteristicValue) {
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits).updateValue(value);
+  }
+
+  async updateTemperature() {
+    try {
+      const response = await fetch(this.platform.config.temperatureUrl);
+      const data = await response.json();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.currentTemperature = this.platform.config.temperatureJsonPath.split('.').reduce((o: any, k: any) => {
+        return o && o[k];
+      }, data) as number;
+
+      this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature).updateValue(this.currentTemperature);
+    } catch (error) {
+      this.platform.log.error('Error getting temperature: ', error);
+    }
+  }
+
+  async updateRelayState() {
+    this.relayState = this.accessoryState && this.currentTemperature < this.targetTemperature;
+    this.platform.log.debug('Updating relay state: ', this.relayState);
+    try {
+      await fetch(this.relayState ? this.platform.config.thermostatOnUrl : this.platform.config.thermostatOffUrl);
+    } catch (error) {
+      this.platform.log.error('Error updating relay state: ', error);
+    }
   }
 }
