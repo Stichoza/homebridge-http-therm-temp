@@ -2,7 +2,7 @@
   "name": "homebridge-http-therm-temp",
   "displayName": "HTTP Temperature Thermostat",
   "type": "module",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "HTTP Thermostat plugin which uses external HTTP temperature sensor.",
   "author": "Levan Velijanashvili <me@stichoza.com>",
   "maintainers": [
