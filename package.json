@@ -3,7 +3,6 @@
   "displayName": "HTTP Temperature Thermostat",
   "type": "module",
   "version": "2.0.0",
-  "private": true,
   "description": "HTTP Thermostat plugin which uses external HTTP temperature sensor.",
   "author": "Levan Velijanashvili <me@stichoza.com>",
   "maintainers": [
