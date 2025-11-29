@@ -58,10 +58,8 @@ export class HttpThermostatTemperatureAccessory {
       .onGet(this.getTemperatureDisplayUnits.bind(this))
       .onSet(this.setTemperatureDisplayUnits.bind(this));
 
-    setInterval(async () => {
-      await this.updateTemperature();
-      await this.updateRelayState();
-    }, 60000);
+    setInterval(this.updateTemperature.bind(this), 60000);
+    setInterval(this.updateRelayState.bind(this), 5000);// TODO: Change to 60000 after fixing relay code: https://github.com/Stichoza/esp-thermostat-controller/
   }
 
   async getCurrentHeatingCoolingState() {
