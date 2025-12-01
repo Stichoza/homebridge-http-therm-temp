@@ -76,6 +76,7 @@ export class HttpThermostatTemperatureAccessory {
     this.accessoryState = value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).updateValue(value);
     await this.updateRelayState();
+    this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState).updateValue(value);
   }
 
   async getCurrentTemperature() {
